@@ -6,31 +6,35 @@
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>17878EB4-8593-40AF-A169-788B6DFA4A0F</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Week1TwitterClone</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>2586C88BEA8D9A3DFA30CF3EC02BC5BD7E5CA0E7</key>
-		<string>https://github.com/jkahl7/sea-b29-iOS.git</string>
+		<key>A1F9697C287118A0B8E3F3995A86CE633FBA7A47</key>
+		<string>https://github.com/jkahl7/week1TwitterClone.git</string>
 	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Week1TwitterClone/Week1TwitterClone.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>2586C88BEA8D9A3DFA30CF3EC02BC5BD7E5CA0E7</key>
-		<string>sea-b29-iOS/</string>
+		<key>A1F9697C287118A0B8E3F3995A86CE633FBA7A47</key>
+		<string>../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/jkahl7/sea-b29-iOS.git</string>
+	<string>https://github.com/jkahl7/week1TwitterClone.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>2586C88BEA8D9A3DFA30CF3EC02BC5BD7E5CA0E7</string>
+	<string>A1F9697C287118A0B8E3F3995A86CE633FBA7A47</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>2586C88BEA8D9A3DFA30CF3EC02BC5BD7E5CA0E7</string>
+			<string>A1F9697C287118A0B8E3F3995A86CE633FBA7A47</string>
 			<key>IDESourceControlWCCName</key>
-			<string>sea-b29-iOS</string>
+			<string>CodeFellowsHW</string>
 		</dict>
 	</array>
 </dict>
