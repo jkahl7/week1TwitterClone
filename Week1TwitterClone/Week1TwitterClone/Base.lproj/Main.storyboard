@@ -17,11 +17,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="98" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="tIU-rk-EcK">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" bounces="NO" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="98" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="tIU-rk-EcK">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="CELL" rowHeight="100" id="OLp-91-cL9" customClass="TweetCell" customModule="Week1TwitterClone" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" shouldIndentWhileEditing="NO" reuseIdentifier="CELL" rowHeight="100" id="OLp-91-cL9" customClass="TweetCell" customModule="Week1TwitterClone" customModuleProvider="target">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="OLp-91-cL9" id="WAz-iv-Bpq">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -172,7 +172,7 @@
                         <outlet property="backgroundImage" destination="Vid-l5-Zgy" id="uZE-yW-rub"/>
                         <outlet property="followersCount" destination="Jfe-a1-GAN" id="g53-vY-lee"/>
                         <outlet property="headerView" destination="Xm7-9W-ev2" id="wem-Mf-0fU"/>
-                        <outlet property="locationLable" destination="JHy-g2-vJr" id="dqW-lQ-3vf"/>
+                        <outlet property="locationLabel" destination="JHy-g2-vJr" id="Nn7-bI-dRc"/>
                         <outlet property="statusCount" destination="sbW-uV-Pfi" id="Djv-RM-tWH"/>
                         <outlet property="tableView" destination="lLb-JG-BrJ" id="67F-Kk-BIC"/>
                         <outlet property="twitterHandle" destination="hO5-Ft-9iO" id="K5N-cW-kFF"/>

@@ -19,7 +19,7 @@ class TimeLineViewController: UIViewController, UITableViewDataSource, UITableVi
   
   @IBOutlet weak var followersCount: UILabel!
   @IBOutlet weak var statusCount: UILabel!
-  @IBOutlet weak var locationLable: UILabel!
+  @IBOutlet weak var locationLabel: UILabel!
   @IBOutlet weak var twitterHandle: UILabel!
  
   @IBOutlet weak var userImage: UIImageView!
@@ -36,7 +36,7 @@ class TimeLineViewController: UIViewController, UITableViewDataSource, UITableVi
     
     self.followersCount.text = "Followers:\(self.selectedTweet.followersCount)"
     self.statusCount.text = "Tweets:\(self.selectedTweet.statusesCount)"
-    self.locationLable.text = self.selectedTweet.tweeterLocation
+    self.locationLabel.text = self.selectedTweet.tweeterLocation
     self.backgroundImage.image = self.selectedTweet.backgroundImage
     self.userImage.image = self.selectedTweet.image
     self.twitterHandle.text = "@" + self.selectedTweet.twitterHandle
@@ -68,9 +68,12 @@ class TimeLineViewController: UIViewController, UITableViewDataSource, UITableVi
     cell.tweetContent.text = tweets[indexPath.row].tweetText
     cell.userName.text = tweets[indexPath.row].tweeter
     cell.userImageButton.setImage(tweets[indexPath.row].image, forState: .Normal)
-
-    
-    //lazy loading
+        
+    //lazy loading / add initial if condition that checks if rt or reply
+    /*
+    if(self.tweets[indexPath.row].retweetReply != nil) {
+      
+    }*/
     if(self.tweets[indexPath.row].image == nil) {
       self.networkController.fetchImageForCell(self.tweets[indexPath.row], storedIndexPath: indexPath, completionHandler: { (image, storedIndexPath, errorReport) -> Void in
         if(errorReport == nil) {

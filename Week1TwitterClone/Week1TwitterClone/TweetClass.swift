@@ -29,7 +29,7 @@ class Tweet {
   var backgroundImage:UIImage?
   var backgroundImageLocation:String
   
-  //var retweetReply:String
+  var retweetStatus:String?
   
   init(tweetDictionary: [String:AnyObject]) {
     self.tweetText = tweetDictionary["text"] as String
@@ -45,7 +45,15 @@ class Tweet {
     self.profileImageLocation = user["profile_image_url"] as String
     self.statusesCount = user["statuses_count"] as Int
     self.followersCount = user["followers_count"] as Int
-    //self.retweetReply = tweetDictionary["in_reply_to_status_id_str"] as String
+    self.retweetStatus = tweetDictionary["retweeted_status"] as? String
+    
+    if (retweetStatus != nil) {
+      //tweet is a retweet
+      let tempAttempt = tweetDictionary["retweeted_status"] as [String:AnyObject]
+      let retweetDict = tempAttempt["user"] as [String:AnyObject]
+      self.profileImageLocation = retweetDict["profile_image_url"] as String
+      self.userID = retweetDict["id_str"] as String
+    }
   }
   // function updates tweet details after second call
   func updateWithInfo(tweetDictionary: [String:AnyObject]) {

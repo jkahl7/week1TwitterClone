@@ -15,7 +15,7 @@ class NetworkController {
   }
   var userTwitterAccount = ACAccount?()
   var imageQueueforImage = NSOperationQueue() //initiates 
-  //need fetchHomeTimeline func with closure
+  //fetchHomeTimeline func with closure
   func fetchHomeTimeline( completionHandler: (tweet:[Tweet]?, errorReport:String?) -> Void) {
     let accountStore = ACAccountStore()
     let accountType = accountStore.accountTypeWithAccountTypeIdentifier(ACAccountTypeIdentifierTwitter)
@@ -109,10 +109,11 @@ class NetworkController {
       if (error == nil) {
         switch response.statusCode {
         case 200...299:
-          println("FetchTimeLine:\(response.statusCode)")
+          //println("FetchTimeLine:\(response.statusCode)")
           var error:NSError?
           if let timelineAPIData = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error) as? [AnyObject] {
             if (error == nil) {
+              //println(timelineAPIData)
               for object in timelineAPIData {
                 var tweets = [Tweet]()
                 if let jsonDictionary = object as? [String:AnyObject] {
