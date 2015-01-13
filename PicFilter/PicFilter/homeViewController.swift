@@ -64,7 +64,9 @@ class homeViewController: UIViewController {
     let titleBarConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-20-[titleBar]-20-|", options: nil, metrics: nil, views: views)
     rootView.addConstraints(titleBarConstraintHorizontal)
     
-    let titleBarConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:[navBar]-20-[titleBar]", options: nil, metrics: nil, views: views)
+    //TODO: !! weird bug where the imageView disappears when the title bar is constrained to the navBar.... had to switch title bar back to superview top constraint for now....
+    
+    let titleBarConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:|-20-[titleBar]", options: nil, metrics: nil, views: views)
     rootView.addConstraints(titleBarConstraintVerticle)
   
     /*****************************

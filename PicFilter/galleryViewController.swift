@@ -17,11 +17,24 @@ class galleryViewController: UIViewController, UICollectionViewDataSource {
   override func loadView() {
     let rootView = UIView(frame: UIScreen.mainScreen().bounds)
     let collectionViewFlowLayout = UICollectionViewFlowLayout()
+    collectionViewFlowLayout.itemSize = CGSize(width: 225, height: 185)
+    collectionViewFlowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
+    collectionViewFlowLayout.sectionInset = UIEdgeInsets(top: 5, left: 1, bottom: 5, right: 1)
+      
     self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: collectionViewFlowLayout)
     rootView.addSubview(self.collectionView)
     self.collectionView.dataSource = self
-    collectionViewFlowLayout.itemSize = CGSize(width: 150, height: 150)
     
+/*    var minimumLineSpacing: CGFloat
+var minimumInteritemSpacing: CGFloat
+var itemSize: CGSize
+@availability(iOS, introduced=8.0)
+var estimatedItemSize: CGSize // defaults to CGSizeZero - setting a non-zero size enables cells that self-size via -perferredLayoutAttributesFittingAttributes:
+var scrollDirection: UICollectionViewScrollDirection // default is UICollectionViewScrollDirectionVertical
+var headerReferenceSize: CGSize
+var footerReferenceSize: CGSize
+var sectionInset: UIEdgeInsets */
+
     let navBar = self.navigationController!.navigationBar
     rootView.addSubview(navBar)
     
@@ -64,6 +77,6 @@ class galleryViewController: UIViewController, UICollectionViewDataSource {
     }
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-      return 2
+      return 1
     }
 }
