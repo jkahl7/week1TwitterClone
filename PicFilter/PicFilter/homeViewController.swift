@@ -8,44 +8,69 @@
 
 import UIKit
 
-class homeViewController: UIViewController {
+class homeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageSelectionProtocol {
   
   let alertController = UIAlertController(title: "I Should Put", message: "Something Here", preferredStyle: UIAlertControllerStyle.ActionSheet)
+  let rootView = UIView(frame: UIScreen.mainScreen().bounds)
+  let mainButton = UIButton()
+  let mainImage = UIImageView()
+  let collectionViewFlowLayout = UICollectionViewFlowLayout()
+  let imageQueue = NSOperationQueue()
+  
+  var thumbnailArray = [Thumbnail]()
+  var filterArray = [String]()
+  
+  var filteredMainImage:UIImage? //this variable will store the selected image / for use with filter setting
+  var gpuContext:CIContext!
+  var originalThumbnail:UIImage!
+  var collectionViewYConstraint:NSLayoutConstraint!
+  var collectionView:UICollectionView!
   
   override func loadView() {
-    //instantiates the rootView VC
-    let rootView = UIView(frame: UIScreen.mainScreen().bounds)
+    //basic attributes for views + subviews
     rootView.backgroundColor = UIColor.whiteColor()
     
-    let mainButton = UIButton()
     mainButton.backgroundColor = UIColor.blackColor()
     mainButton.setTitle("Images", forState: .Normal)
     mainButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
     mainButton.addTarget(self, action: "mainButtonActivated:", forControlEvents: UIControlEvents.TouchUpInside)
     
-    let titleBar = UILabel()
-    titleBar.backgroundColor = UIColor.blackColor()
-    titleBar.textColor = UIColor.whiteColor()
-    titleBar.text = "Welcome to PicFilter!"
-    titleBar.textAlignment = .Center
+    mainImage.backgroundColor = UIColor.clearColor()
+    mainImage.contentMode = UIViewContentMode.ScaleAspectFit
+    mainImage.layer.masksToBounds = true
     
-    let imageView = UIView()
-    imageView.backgroundColor = UIColor.blueColor()
+  
+    collectionViewFlowLayout.itemSize = CGSize(width: 100, height: 85)
+    collectionViewFlowLayout.scrollDirection = .Horizontal
+    self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: collectionViewFlowLayout)
+    self.collectionView.dataSource = self
+    self.collectionView.backgroundColor = UIColor.whiteColor()
+    self.collectionView.registerClass(GalleryCell.self, forCellWithReuseIdentifier: "GALLERYCELL")
     
     let navBar = self.navigationController!.navigationBar
-    rootView.addSubview(navBar)
+    
+    // add subViews to the root
     rootView.addSubview(mainButton)
-    rootView.addSubview(titleBar)
-    rootView.addSubview(imageView)
+    rootView.addSubview(mainImage)
+    rootView.addSubview(navBar)
+    rootView.addSubview(collectionView)
     
     mainButton.setTranslatesAutoresizingMaskIntoConstraints(false)
-    titleBar.setTranslatesAutoresizingMaskIntoConstraints(false)
-    imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+    mainImage.setTranslatesAutoresizingMaskIntoConstraints(false)
+    collectionView.setTranslatesAutoresizingMaskIntoConstraints(false)
+  
     
     let views = ["mainButton" : mainButton,
-                  "titleBar" : titleBar,
-                  "imageView" : imageView,
-                  "navBar" : navBar]
+                  "mainImage" : mainImage,
+                     "navBar" : navBar,
+             "collectionView" : collectionView]
+    
+    // disables color context for increased performance at the cost of reduced image quality
+    let options = [kCIContextWorkingColorSpace:NSNull()]
+    let eaglContext = EAGLContext(API: EAGLRenderingAPI.OpenGLES2) //boilerplate code from apple
+    self.gpuContext = CIContext(EAGLContext: eaglContext, options: options)
+    self.thumbNailSetup()
+    //TODO: generate thumbnails here
     
     /*****************************
     ** constraints for mainButton
@@ -58,33 +83,31 @@ class homeViewController: UIViewController {
     rootView.addConstraint(mainButtonCenter)
     
     /*****************************
-    ** constraints for titleBar
-    ******************************/
-    
-    let titleBarConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-20-[titleBar]-20-|", options: nil, metrics: nil, views: views)
-    rootView.addConstraints(titleBarConstraintHorizontal)
-    
-    //TODO: !! weird bug where the imageView disappears when the title bar is constrained to the navBar.... had to switch title bar back to superview top constraint for now....
-    
-    let titleBarConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:|-20-[titleBar]", options: nil, metrics: nil, views: views)
-    rootView.addConstraints(titleBarConstraintVerticle)
-  
-    /*****************************
     ** constraints for imageView
     ******************************/
-    //sets a horizontal constraint for the imageViews width
-    let imageViewConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-40-[imageView]-40-|",
-      options: nil, metrics: nil, views: views)
-    rootView.addConstraints(imageViewConstraintHorizontal)
     
-    let imageViewCenteredXandY = NSLayoutConstraint.constraintsWithVisualFormat("V:[titleBar]-40-[imageView]-40-[mainButton]", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: views)
-    rootView.addConstraints(imageViewCenteredXandY)
-  
+    //sets a horizontal constraint for the imageViews width
+    let mainImageConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-10-[mainImage]-10-|",
+      options: nil, metrics: nil, views: views)
+    rootView.addConstraints(mainImageConstraintHorizontal)
+    
+    let mainImageCenteredXandY = NSLayoutConstraint.constraintsWithVisualFormat("V:|-50-[mainImage]-20-[mainButton]", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: views)
+    rootView.addConstraints(mainImageCenteredXandY)
+    
+    /**********************************
+    ** constraints for collectionView
+    **********************************/
+    
+    let collectionViewConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collectionView]-|", options: nil, metrics: nil, views: views)
+    rootView.addConstraints(collectionViewConstraintHorizontal)
+    
+    let collectionViewHeight = NSLayoutConstraint.constraintsWithVisualFormat("V:[collectionView(100)]", options: nil, metrics: nil, views: views)
+    self.collectionView.addConstraints(collectionViewHeight )
+    let collectionViewConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:[collectionView]-(-120)-|", options: nil, metrics: nil, views: views)
+    rootView.addConstraints(collectionViewConstraintVerticle)
+    self.collectionViewYConstraint = collectionViewConstraintVerticle.first as NSLayoutConstraint
+    
     self.view = rootView
-  }
-  
-  func mainButtonActivated(sender: UIButton) {
-    self.presentViewController(self.alertController, animated: true, completion: nil)
   }
   
   override func viewDidLoad() {
@@ -92,12 +115,95 @@ class homeViewController: UIViewController {
     
     let galleryAlert = UIAlertAction(title: "Gallery", style: UIAlertActionStyle.Default) { (action) -> Void in
       let galleryVC = galleryViewController()
+      galleryVC.delegate = self
       self.navigationController?.pushViewController(galleryVC, animated: true)
-      println("gallery alert selected....")
     }
     self.alertController.addAction(galleryAlert)
+    
+    
+    let filterAlert = UIAlertAction(title: "Filter", style: UIAlertActionStyle.Default) { (action) -> Void in
+      // allow done button to apply selected filter and hide collectionView
+      self.collectionViewYConstraint.constant = 20
+      UIView.animateWithDuration(0.4, animations: { () -> Void in
+        self.view.layoutIfNeeded()   // invalidates the mode of the current receiver and triggers a layout update w/ next cycle
+      })
+    }
+    self.alertController.addAction(filterAlert)
   }
 
+  func mainButtonActivated(sender: UIButton) {
+    self.presentViewController(self.alertController, animated: true, completion: nil)
+  }
+  
+  func thumbNailSetup() {
+    self.filterArray = ["CISepiaTone","CIPhotoEffectChrome", "CIColorPosterize",
+      "CIPhotoEffectNoir","CIPhotoEffectMono", "CIPhotoEffectFade","CIPhotoEffectTransfer"]
+    // loop through filterArray and initilize a Thumbnail object
+    for name in self.filterArray {
+      let thumbnail = Thumbnail(filterName: name, imageQueue: self.imageQueue, gpuContext: self.gpuContext)
+      thumbnailArray.append(thumbnail)
+    }
+  }
+  
+  func thumbNailGenerator(originalImage: UIImage) {
+    var size = CGSize(width: 100, height: 100)
+    //begin drawing
+    UIGraphicsBeginImageContext(size)
+    //draw image in the CGRect - draws to context
+    originalImage.drawInRect(CGRect(x: 0, y: 0, width: 100, height: 100))
+    //pull thumbnail out
+    self.originalThumbnail = UIGraphicsGetImageFromCurrentImageContext()
+  }
+  
+  
+  func controllerDidSelectImage(image: UIImage) -> Void {
+    println("image selected")
+    self.mainImage.image = image
+    // generate thumbnails here
+    self.thumbNailGenerator(image)
+    // reload collectionView Data here
+    for thumbnail in self.thumbnailArray {
+      thumbnail.originalImage = self.originalThumbnail
+    }
+    self.collectionView.reloadData()
+  }
+  
+  func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return self.filterArray.count
+  }
+  
+  /*function for generating a filtered main image    TODO: this doesn't work :|
+  func filterForMainImage(indexPath:NSIndexPath!) {
+    let baseImage = self.mainImage.image
+    let filter = CIFilter(name: self.filterArray[indexPath.row])
+    filter.setDefaults()
+    filter.setValue(baseImage, forKey: kCIInputImageKey)
+    let result = filter.valueForKey(kCIInputImageKey) as CIImage
+    let extent = result.extent()
+    let imageRef = self.gpuContext.createCGImage(result, fromRect: extent)
+    self.filteredMainImage = UIImage(CGImage: imageRef)
+  } */
+  
+  func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    
+    //filterForMainImage(indexPath)
+    //self.mainImage.reloadInputViews()
+    println("\(indexPath.row) selected")
+    // when row selected > get index path of row > find out what filter is at that indexpath
+    //call filterForMainImage using that filter
+  }
+  
+  // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
+  func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("GALLERYCELL", forIndexPath: indexPath) as GalleryCell
+    let thumbnail = self.thumbnailArray[indexPath.row]
+    if thumbnail.originalImage != nil && thumbnail.filteredImage == nil {
+      thumbnail.generateFilteredImage()
+      cell.imageView.image = thumbnail.filteredImage!
+    }
+    return cell
+  }
+  
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
   }

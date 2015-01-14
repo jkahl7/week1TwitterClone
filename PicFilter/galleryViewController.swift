@@ -8,11 +8,23 @@
 
 import UIKit
 
-class galleryViewController: UIViewController, UICollectionViewDataSource {
 
-  let imageCount:Int = 10
+protocol ImageSelectionProtocol {
+  /**************************************************************************************************
+  ** this function will be defined in any class that adopts its protocol. this allows any object that sets
+  ** a variable = to ImageSelectionProtocol to have access to the functions defined within other objects. so I can call this method in 
+  ** galleryViewController passing in an image type and then utilize whatever image was passed in in the conforming class. This allows for 
+  ** a more indirect association between these two objects thus avoiding any dependency which could potentially cause memory leaks/cycles
+  ***************************************************************************************************/
+  func controllerDidSelectImage(UIImage) -> Void
+}
+
+class galleryViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
+
+  let imageCount:Int = 10 //TODO: dont forget to change this when an actually array is passed
   var collectionView : UICollectionView!
   var galleryImages = [UIImage]()
+  var delegate:ImageSelectionProtocol?
   
   override func loadView() {
     let rootView = UIView(frame: UIScreen.mainScreen().bounds)
@@ -23,17 +35,9 @@ class galleryViewController: UIViewController, UICollectionViewDataSource {
       
     self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: collectionViewFlowLayout)
     rootView.addSubview(self.collectionView)
+    self.collectionView.backgroundColor = UIColor.whiteColor()
     self.collectionView.dataSource = self
-    
-/*    var minimumLineSpacing: CGFloat
-var minimumInteritemSpacing: CGFloat
-var itemSize: CGSize
-@availability(iOS, introduced=8.0)
-var estimatedItemSize: CGSize // defaults to CGSizeZero - setting a non-zero size enables cells that self-size via -perferredLayoutAttributesFittingAttributes:
-var scrollDirection: UICollectionViewScrollDirection // default is UICollectionViewScrollDirectionVertical
-var headerReferenceSize: CGSize
-var footerReferenceSize: CGSize
-var sectionInset: UIEdgeInsets */
+    self.collectionView.delegate = self
 
     let navBar = self.navigationController!.navigationBar
     rootView.addSubview(navBar)
@@ -45,22 +49,21 @@ var sectionInset: UIEdgeInsets */
     self.view = rootView
   }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-      self.view.backgroundColor = UIColor.blackColor()
-      self.collectionView.registerClass(GalleryCell.self, forCellWithReuseIdentifier: "GALLERYCELL")
+  override func viewDidLoad() {
+      super.viewDidLoad()
+    self.view.backgroundColor = UIColor.blackColor()
+    self.collectionView.registerClass(GalleryCell.self, forCellWithReuseIdentifier: "GALLERYCELL")
       
-      for(var i = 0; i < imageCount; i++){
-        let image = UIImage(named: "image\(i).jpeg")
-        galleryImages.append(image!)
-      }
+    for (var i = 0; i < imageCount; i++) {
+      let image = UIImage(named: "image\(i).jpeg")
+      galleryImages.append(image!)
     }
+  }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
-    
+  override func didReceiveMemoryWarning() {
+      super.didReceiveMemoryWarning()
+  }
+
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
       return galleryImages.count
     }
@@ -75,8 +78,12 @@ var sectionInset: UIEdgeInsets */
       
       return cell
     }
+  
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+      //call the function located within the protocol - this function is defined and returns in whatever class adopts its protocol
+      self.delegate?.controllerDidSelectImage(self.galleryImages[indexPath.row])
     
-    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-      return 1
+      self.navigationController?.popViewControllerAnimated(true)
+      println("selected image at\(indexPath.row)")
     }
 }

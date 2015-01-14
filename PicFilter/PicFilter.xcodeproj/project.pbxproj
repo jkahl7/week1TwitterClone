@@ -24,6 +24,7 @@
 		4383208C1A6468EE0013CBC3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4383208B1A6468EE0013CBC3 /* Images.xcassets */; };
 		4383208F1A6468EE0013CBC3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4383208D1A6468EE0013CBC3 /* LaunchScreen.xib */; };
 		4383209B1A6468EE0013CBC3 /* PicFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4383209A1A6468EE0013CBC3 /* PicFilterTests.swift */; };
+		43DF5C761A65F02200EAE40D /* Thumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DF5C751A65F02200EAE40D /* Thumbnail.swift */; };
 		43F0A1091A649F0D00AFDF1D /* GalleryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F0A1081A649F0D00AFDF1D /* GalleryCell.swift */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +60,7 @@
 		438320941A6468EE0013CBC3 /* PicFilterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PicFilterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		438320991A6468EE0013CBC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4383209A1A6468EE0013CBC3 /* PicFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicFilterTests.swift; sourceTree = "<group>"; };
+		43DF5C751A65F02200EAE40D /* Thumbnail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thumbnail.swift; sourceTree = "<group>"; };
 		43F0A1081A649F0D00AFDF1D /* GalleryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -156,6 +158,7 @@
 		43F0A1031A648DE100AFDF1D /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				43DF5C751A65F02200EAE40D /* Thumbnail.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -293,6 +296,7 @@
 				43F0A1091A649F0D00AFDF1D /* GalleryCell.swift in Sources */,
 				430305A21A64A44D0091165C /* galleryViewController.swift in Sources */,
 				438320871A6468EE0013CBC3 /* homeViewController.swift in Sources */,
+				43DF5C761A65F02200EAE40D /* Thumbnail.swift in Sources */,
 				438320851A6468EE0013CBC3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
