@@ -32,19 +32,15 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
     collectionViewFlowLayout.itemSize = CGSize(width: 225, height: 185)
     collectionViewFlowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
     collectionViewFlowLayout.sectionInset = UIEdgeInsets(top: 5, left: 1, bottom: 5, right: 1)
-      
+    
     self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: collectionViewFlowLayout)
     rootView.addSubview(self.collectionView)
     self.collectionView.backgroundColor = UIColor.whiteColor()
+    
+    let view = ["collectionViewFlowLayout" : collectionViewFlowLayout]
+
     self.collectionView.dataSource = self
     self.collectionView.delegate = self
-
-    let navBar = self.navigationController!.navigationBar
-    rootView.addSubview(navBar)
-    
-    let view = ["navBar" : navBar, "collectionViewFlowLayout" : collectionViewFlowLayout]
-    
-    let collectionViewConstraints = NSLayoutConstraint.constraintsWithVisualFormat("V:[navBar]-10-[collectionViewFlowLayout]", options: nil, metrics: nil, views: view)
     
     self.view = rootView
   }
@@ -84,6 +80,5 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
       self.delegate?.controllerDidSelectImage(self.galleryImages[indexPath.row])
     
       self.navigationController?.popViewControllerAnimated(true)
-      println("selected image at\(indexPath.row)")
     }
 }

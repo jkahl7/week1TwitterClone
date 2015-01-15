@@ -7,10 +7,12 @@
 //
 
 import UIKit
+import Social
 
-class homeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageSelectionProtocol {
+class homeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageSelectionProtocol, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
   
   let alertController = UIAlertController(title: "I Should Put", message: "Something Here", preferredStyle: UIAlertControllerStyle.ActionSheet)
+  
   let rootView = UIView(frame: UIScreen.mainScreen().bounds)
   let mainButton = UIButton()
   let mainImage = UIImageView()
@@ -20,12 +22,16 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   var thumbnailArray = [Thumbnail]()
   var filterArray = [String]()
   
-  var filteredMainImage:UIImage? //this variable will store the selected image / for use with filter setting
+  var cancelButton:UIBarButtonItem!
+  var shareButton:UIBarButtonItem!
+  var doneButton:UIBarButtonItem!
+  
+  var originalImage:UIImage?
+  var unalteredImage:UIImage? //this variable will store the selected image and save its un edited form
   var gpuContext:CIContext!
   var originalThumbnail:UIImage!
-  var collectionViewYConstraint:NSLayoutConstraint!
   var collectionView:UICollectionView!
-  
+  var collectionViewYConstraint:NSLayoutConstraint!
   override func loadView() {
     //basic attributes for views + subviews
     rootView.backgroundColor = UIColor.whiteColor()
@@ -36,23 +42,22 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     mainButton.addTarget(self, action: "mainButtonActivated:", forControlEvents: UIControlEvents.TouchUpInside)
     
     mainImage.backgroundColor = UIColor.clearColor()
-    mainImage.contentMode = UIViewContentMode.ScaleAspectFit
+    mainImage.contentMode = UIViewContentMode.ScaleToFill
     mainImage.layer.masksToBounds = true
     
-  
     collectionViewFlowLayout.itemSize = CGSize(width: 100, height: 85)
     collectionViewFlowLayout.scrollDirection = .Horizontal
     self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: collectionViewFlowLayout)
+    
     self.collectionView.dataSource = self
+    self.collectionView.delegate = self
+    
     self.collectionView.backgroundColor = UIColor.whiteColor()
     self.collectionView.registerClass(GalleryCell.self, forCellWithReuseIdentifier: "GALLERYCELL")
     
-    let navBar = self.navigationController!.navigationBar
-    
-    // add subViews to the root
+    //add subViews to the root
     rootView.addSubview(mainButton)
     rootView.addSubview(mainImage)
-    rootView.addSubview(navBar)
     rootView.addSubview(collectionView)
     
     mainButton.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -62,7 +67,6 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     let views = ["mainButton" : mainButton,
                   "mainImage" : mainImage,
-                     "navBar" : navBar,
              "collectionView" : collectionView]
     
     // disables color context for increased performance at the cost of reduced image quality
@@ -70,7 +74,6 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     let eaglContext = EAGLContext(API: EAGLRenderingAPI.OpenGLES2) //boilerplate code from apple
     self.gpuContext = CIContext(EAGLContext: eaglContext, options: options)
     self.thumbNailSetup()
-    //TODO: generate thumbnails here
     
     /*****************************
     ** constraints for mainButton
@@ -109,7 +112,8 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     self.view = rootView
   }
-  
+ 
+  //MARK: viewDidLoad()
   override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -120,25 +124,92 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     }
     self.alertController.addAction(galleryAlert)
     
+    let photoAlert = UIAlertAction(title: "Photos", style: UIAlertActionStyle.Default) { (action) -> Void in
+      let photoVC = photosViewController()
+      photoVC.delegate = self
+      self.navigationController?.pushViewController(photoVC, animated: true)
+    }
+    self.alertController.addAction(photoAlert)
     
     let filterAlert = UIAlertAction(title: "Filter", style: UIAlertActionStyle.Default) { (action) -> Void in
       // allow done button to apply selected filter and hide collectionView
+      self.navigationItem.rightBarButtonItem = self.doneButton
       self.collectionViewYConstraint.constant = 20
       UIView.animateWithDuration(0.4, animations: { () -> Void in
         self.view.layoutIfNeeded()   // invalidates the mode of the current receiver and triggers a layout update w/ next cycle
       })
     }
     self.alertController.addAction(filterAlert)
+    
+    self.cancelButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: "cancelFilterSelect")
+    self.doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: "doneButtonSelected")
+    self.shareButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Action, target: self, action: "shareButtonSelected")
+    self.navigationItem.rightBarButtonItem = self.shareButton
+  
+    if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)) {
+      let cameraOption = UIAlertAction(title: "Camera", style: UIAlertActionStyle.Default, handler: { (action) -> Void in
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.sourceType = UIImagePickerControllerSourceType.Camera
+        imagePickerController.allowsEditing = true
+        imagePickerController.delegate = self
+        self.presentViewController(imagePickerController, animated: true, completion: nil)
+      })
+      self.alertController.addAction(cameraOption)
+    }
   }
 
+  //MARK: button actions
   func mainButtonActivated(sender: UIButton) {
     self.presentViewController(self.alertController, animated: true, completion: nil)
   }
   
+  func cancelFilterSelect() {
+    self.collectionViewYConstraint.constant = -120
+    if (self.originalImage != nil) {
+      self.mainImage.image = self.originalImage
+    }
+    UIView.animateWithDuration(0.4, animations: { () -> Void in
+    self.view.layoutIfNeeded()
+    })
+  }
+
+  func doneButtonSelected() {
+    self.collectionViewYConstraint.constant = -120
+    UIView.animateWithDuration(0.4, animations: { () -> Void in
+    self.view.layoutIfNeeded()
+      
+    })
+  }
+  
+  func shareButtonSelected() {
+    let notSignedInAlert = UIAlertController(title: "Error", message: "You are not signed into Twitter!", preferredStyle: UIAlertControllerStyle.Alert)
+    if(SLComposeViewController.isAvailableForServiceType(SLServiceTypeTwitter)) {
+      let composeVC = SLComposeViewController(forServiceType: SLServiceTypeTwitter)
+      composeVC.addImage(self.mainImage.image)
+      self.presentViewController(composeVC, animated: true, completion: nil)
+    } else {
+      println("user not logged into twitter")
+      let notSignedInAlert = UIAlertController(title: "Error", message: "You are not signed into Twitter!", preferredStyle: UIAlertControllerStyle.Alert)
+      let twitterAlert = UIAlertAction(title: "Okay", style: UIAlertActionStyle.Destructive, handler: nil)
+      notSignedInAlert.addAction(twitterAlert)
+    }
+  }
+  
+  // Tells the delegate that the user picked an image
+  func imagePickerController(picker: UIImagePickerController!, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
+    let image = editingInfo[UIImagePickerControllerEditedImage] as? UIImage
+    self.controllerDidSelectImage(image!)
+    picker.dismissViewControllerAnimated(true, completion: nil)
+  }
+  
+  func imagePickerDidCancel(picker:UIImagePickerController) {
+    picker.dismissViewControllerAnimated(true, completion: nil)
+  }
+  
   func thumbNailSetup() {
     self.filterArray = ["CISepiaTone","CIPhotoEffectChrome", "CIColorPosterize",
-      "CIPhotoEffectNoir","CIPhotoEffectMono", "CIPhotoEffectFade","CIPhotoEffectTransfer"]
-    // loop through filterArray and initilize a Thumbnail object
+     "CIPhotoEffectNoir","CIPhotoEffectMono", "CIPhotoEffectFade","CIPhotoEffectTransfer"]
+    // loop through filterArray and initilize a Thumbnail object for each name
     for name in self.filterArray {
       let thumbnail = Thumbnail(filterName: name, imageQueue: self.imageQueue, gpuContext: self.gpuContext)
       thumbnailArray.append(thumbnail)
@@ -147,57 +218,52 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   
   func thumbNailGenerator(originalImage: UIImage) {
     var size = CGSize(width: 100, height: 100)
-    //begin drawing
-    UIGraphicsBeginImageContext(size)
-    //draw image in the CGRect - draws to context
-    originalImage.drawInRect(CGRect(x: 0, y: 0, width: 100, height: 100))
-    //pull thumbnail out
-    self.originalThumbnail = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsBeginImageContext(size)      //begin drawing
+    originalImage.drawInRect(CGRect(x: 0, y: 0, width: 100, height: 100)) //draw image in the CGRect - draws to context
+    self.originalThumbnail = UIGraphicsGetImageFromCurrentImageContext()  //pull thumbnail out
+    UIGraphicsEndImageContext() // frees up the image context - if not implemented will cause a memory leak
   }
   
-  
   func controllerDidSelectImage(image: UIImage) -> Void {
-    println("image selected")
     self.mainImage.image = image
-    // generate thumbnails here
-    self.thumbNailGenerator(image)
+    self.unalteredImage = image
+    self.thumbNailGenerator(image) // generate thumbnails here
     // reload collectionView Data here
     for thumbnail in self.thumbnailArray {
       thumbnail.originalImage = self.originalThumbnail
+      thumbnail.filteredImage = nil // clears out filter
     }
     self.collectionView.reloadData()
+  }
+  
+  //MARK: filterForMainImage()  function for generating a filtered main image    TODO: this doesn't work :|
+  func filterForMainImage(indexPath:NSIndexPath!) -> UIImage {
+    // this is the entire filtering process, synchronous
+    let baseImage = CIImage(image: self.unalteredImage)// recipe for an image
+    let filter = CIFilter(name: self.filterArray[indexPath.row])// string for filter is entered
+    filter.setDefaults() // defaults are set for saftey - if failure occurs here may be an issue with the applied filter
+    filter.setValue(baseImage, forKey: kCIInputImageKey) // inserts original image an extract that image w/ filter applied
+    let result = filter.valueForKey(kCIOutputImageKey) as CIImage  //output and convert the image to a CIImage
+    let extent = result.extent()
+    let imageRef = self.gpuContext.createCGImage(result, fromRect: extent) // remove this - for resizing
+    let filteredMainImage = UIImage(CIImage: result) // convert the CIImage to a UIImage, which can then be displayed
+    return filteredMainImage!    // this is the entire filtering process, synchronous
+  }
+  
+  func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    self.mainImage.image = self.filterForMainImage(indexPath)
+    self.mainImage.reloadInputViews()
   }
   
   func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return self.filterArray.count
   }
   
-  /*function for generating a filtered main image    TODO: this doesn't work :|
-  func filterForMainImage(indexPath:NSIndexPath!) {
-    let baseImage = self.mainImage.image
-    let filter = CIFilter(name: self.filterArray[indexPath.row])
-    filter.setDefaults()
-    filter.setValue(baseImage, forKey: kCIInputImageKey)
-    let result = filter.valueForKey(kCIInputImageKey) as CIImage
-    let extent = result.extent()
-    let imageRef = self.gpuContext.createCGImage(result, fromRect: extent)
-    self.filteredMainImage = UIImage(CGImage: imageRef)
-  } */
-  
-  func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-    
-    //filterForMainImage(indexPath)
-    //self.mainImage.reloadInputViews()
-    println("\(indexPath.row) selected")
-    // when row selected > get index path of row > find out what filter is at that indexpath
-    //call filterForMainImage using that filter
-  }
-  
   // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
     let cell = collectionView.dequeueReusableCellWithReuseIdentifier("GALLERYCELL", forIndexPath: indexPath) as GalleryCell
     let thumbnail = self.thumbnailArray[indexPath.row]
-    if thumbnail.originalImage != nil && thumbnail.filteredImage == nil {
+    if thumbnail.originalImage != nil && thumbnail.filteredImage == nil { //only runs if thumbnail is chosen - else wll crash
       thumbnail.generateFilteredImage()
       cell.imageView.image = thumbnail.filteredImage!
     }
@@ -207,5 +273,6 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
   }
+  //TODO: set up a function that handles all of the constraints on the rootView
 }
 

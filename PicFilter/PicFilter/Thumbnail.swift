@@ -22,13 +22,14 @@ class Thumbnail {
   }
   
   func generateFilteredImage() {
-    let startImage = CIImage(image: self.originalImage)
-    let filter = CIFilter(name: self.filterName)
-    filter.setDefaults()
-    filter.setValue(startImage, forKey: kCIInputImageKey)
-    let result = filter.valueForKey(kCIOutputImageKey) as CIImage
+    // this is the entire filtering process, synchronous
+    let startImage = CIImage(image: self.originalImage) // recipe for an image
+    let filter = CIFilter(name: self.filterName) // string for filter is entered
+    filter.setDefaults() // for saftey - set the defaults on this filter - if failure occurs here may be an issue with the filter selected
+    filter.setValue(startImage, forKey: kCIInputImageKey) // insert original image and extract that image w/ filter applied
+    let result = filter.valueForKey(kCIOutputImageKey) as CIImage // still cant display the image as it is a CIImage
     let extent = result.extent()
-    let imageRef = self.gpuContext.createCGImage(result, fromRect: extent)
-    self.filteredImage = UIImage(CGImage: imageRef)
+    let imageRef = self.gpuContext.createCGImage(result, fromRect: extent) // used to resize the image
+    self.filteredImage = UIImage(CGImage: imageRef) // convert CIImage to a UIImage, which can then be displayed
   }
 }
