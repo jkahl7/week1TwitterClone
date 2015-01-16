@@ -22,6 +22,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   
   var thumbnailArray = [Thumbnail]()
   var filterArray = [String]()
+  var metricsForVFL = [String:AnyObject]()
   
   var cancelButton:UIBarButtonItem!
   var shareButton:UIBarButtonItem!
@@ -36,6 +37,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   var collectionViewYConstraint:NSLayoutConstraint!
   var mainImageResizeableConstraintTop:NSLayoutConstraint!
   var mainImageResizeableConstraintBottom:NSLayoutConstraint!
+  var mainImageResizeableConstraintHorizontal:[AnyObject]!
 
   
   override func loadView() {
@@ -48,9 +50,9 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     self.mainButton.addTarget(self, action: "mainButtonActivated:", forControlEvents: UIControlEvents.TouchUpInside)
     
     self.mainImage.image = defaultImage
-    self.mainImage.backgroundColor = UIColor.clearColor()
-    self.mainImage.contentMode = UIViewContentMode.ScaleAspectFit
-    self.mainImage.layer.masksToBounds = true
+    self.mainImage.backgroundColor = UIColor.blackColor()
+    self.mainImage.contentMode = UIViewContentMode.ScaleAspectFill
+    self.mainImage.layer.masksToBounds = false
     
     self.collectionViewFlowLayout.itemSize = CGSize(width: 100, height: 85)
     self.collectionViewFlowLayout.scrollDirection = .Horizontal
@@ -74,9 +76,12 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     let views = ["mainButton" : mainButton, "mainImage" : mainImage, "collectionView" : collectionView]
     
-    let metricsForVFL = ["mainImageVerticle":60, "mainImageHorizontal":10,
+    self.metricsForVFL = ["mainImageVerticle":100, "mainImageHorizontal":10,
       "cvHeight":100 ,"cvBottom": -120,"mainButtonSize": 25]
-    
+    /*
+    self.shiftMetrics = ["mainImageVerticle":80, "mainImageHorizontal":15,
+      "cvHeight":100 ,"cvBottom": 20,"mainButtonSize": 25]
+    */
     // disables color context for increased performance at the cost of reduced image quality
     let options = [kCIContextWorkingColorSpace:NSNull()]
     let eaglContext = EAGLContext(API: EAGLRenderingAPI.OpenGLES2) //boilerplate code from apple
@@ -123,15 +128,15 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     let filterAlert = UIAlertAction(title: "Filter", style: UIAlertActionStyle.Default) { (action) -> Void in
       // allow done button to apply selected filter and hide collectionView
       self.navigationItem.rightBarButtonItem = self.doneButton
-      self.collectionViewYConstraint.constant = 20
+      self.collectionViewYConstraint.constant = self.metricsForVFL["cvBottom"] as CGFloat + 140
       UIView.animateWithDuration(0.4, animations: { () -> Void in
         self.view.layoutIfNeeded()   // invalidates the mode of the current receiver and triggers a layout update w/ next cycle
       })
-      self.mainImageResizeableConstraintTop.constant = 50
+      self.mainImageResizeableConstraintTop.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat + 20
       UIView.animateWithDuration(0.4, animations: { () -> Void in
         self.view.layoutIfNeeded()
       })
-      self.mainImageResizeableConstraintBottom.constant = 120
+      self.mainImageResizeableConstraintBottom.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat + 20
       UIView.animateWithDuration(0.4, animations: { () -> Void in
         self.view.layoutIfNeeded()
       })
@@ -152,7 +157,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   }
   //TODO: add a cancel filter button???
   func cancelFilterSelect() {
-    self.collectionViewYConstraint.constant = -120
+    self.collectionViewYConstraint.constant = self.metricsForVFL["cvBottom"] as CGFloat
     if (self.unalteredImage != nil) {
       self.mainImage.image = self.unalteredImage
     }
@@ -162,16 +167,16 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   }
   //   doneButtonSelected
   func doneButtonSelected() {
-    self.collectionViewYConstraint.constant = -120
+    self.collectionViewYConstraint.constant = self.metricsForVFL["cvBottom"] as CGFloat
     UIView.animateWithDuration(0.4, animations: { () -> Void in
       self.view.layoutIfNeeded()
     })
     self.navigationItem.rightBarButtonItem = self.shareButton
-      self.mainImageResizeableConstraintTop.constant = 50
+      self.mainImageResizeableConstraintTop.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat
     UIView.animateWithDuration(0.4, animations: { () -> Void in
       self.view.layoutIfNeeded()
     })
-    self.mainImageResizeableConstraintBottom.constant = 80
+    self.mainImageResizeableConstraintBottom.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat
     UIView.animateWithDuration(0.4, animations: { () -> Void in
       self.view.layoutIfNeeded()
     })
@@ -286,13 +291,17 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     //  mainImage
     let mainImageConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-mainImageHorizontal-[mainImage]-mainImageHorizontal-|",
-      options: nil, metrics: nil, views: views)
+      options: nil, metrics: metrics, views: views)
     rootView.addConstraints(mainImageConstraintHorizontal)
+    self.mainImageResizeableConstraintHorizontal = mainImageConstraintHorizontal as [AnyObject]
+    for item in self.mainImageResizeableConstraintHorizontal {
+      println("\(item)")
+    }
 
-    let mainImageConstraintVertTop = NSLayoutConstraint.constraintsWithVisualFormat("V:|-mainImageTop-[mainImage]", options: nil, metrics: metrics, views: views)
+    let mainImageConstraintVertTop = NSLayoutConstraint.constraintsWithVisualFormat("V:|-mainImageVerticle-[mainImage]", options: nil, metrics: metrics, views: views)
     self.mainImageResizeableConstraintTop = mainImageConstraintVertTop.first as NSLayoutConstraint
   
-    let mainImageConstraintVertBottom = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainImage]-mainImageBottom-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: views)
+    let mainImageConstraintVertBottom = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainImage]-mainImageVerticle-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: metrics, views: views)
     rootView.addConstraints(mainImageConstraintVertBottom)
     self.mainImageResizeableConstraintBottom = mainImageConstraintVertBottom.first as NSLayoutConstraint
   

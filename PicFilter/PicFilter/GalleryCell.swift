@@ -19,6 +19,7 @@ class GalleryCell: UICollectionViewCell {
       imageView.contentMode =  UIViewContentMode.ScaleAspectFill
       imageView.layer.masksToBounds = true
   }
+  
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
   }
