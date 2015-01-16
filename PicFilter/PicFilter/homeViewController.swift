@@ -27,8 +27,8 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   var shareButton:UIBarButtonItem!
   var doneButton:UIBarButtonItem!
   
-  var originalImage:UIImage?
-  var unalteredImage:UIImage? //this variable will store the selected image and save its un edited form
+  var unalteredImage:UIImage?//this variable will store the selected image and save its un edited form
+ 
   var gpuContext:CIContext!
   var originalThumbnail:UIImage!
   var collectionView:UICollectionView!
@@ -49,7 +49,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     self.mainImage.image = defaultImage
     self.mainImage.backgroundColor = UIColor.clearColor()
-    self.mainImage.contentMode = UIViewContentMode.ScaleAspectFill
+    self.mainImage.contentMode = UIViewContentMode.ScaleAspectFit
     self.mainImage.layer.masksToBounds = true
     
     self.collectionViewFlowLayout.itemSize = CGSize(width: 100, height: 85)
@@ -72,10 +72,10 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     self.collectionView.setTranslatesAutoresizingMaskIntoConstraints(false)
   
     
-    let views = ["mainButton" : mainButton,
-                  "mainImage" : mainImage,
-             "collectionView" : collectionView]
+    let views = ["mainButton" : mainButton, "mainImage" : mainImage, "collectionView" : collectionView]
     
+    let metricsForVFL = ["mainImageVerticle":60, "mainImageHorizontal":10,
+      "cvHeight":100 ,"cvBottom": -120,"mainButtonSize": 25]
     
     // disables color context for increased performance at the cost of reduced image quality
     let options = [kCIContextWorkingColorSpace:NSNull()]
@@ -83,7 +83,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     self.gpuContext = CIContext(EAGLContext: eaglContext, options: options)
     self.thumbNailSetup()
     
-    self.assignConstraintsForViews(rootView, views: views)
+    self.assignConstraintsForViews(rootView, metrics: metricsForVFL, views: views)
     
     self.view = rootView
   }
@@ -153,8 +153,8 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   //TODO: add a cancel filter button???
   func cancelFilterSelect() {
     self.collectionViewYConstraint.constant = -120
-    if (self.originalImage != nil) {
-      self.mainImage.image = self.originalImage
+    if (self.unalteredImage != nil) {
+      self.mainImage.image = self.unalteredImage
     }
     UIView.animateWithDuration(0.4, animations: { () -> Void in
     self.view.layoutIfNeeded()
@@ -241,15 +241,18 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     filter.setDefaults() // defaults are set for saftey - if failure occurs here may be an issue with the applied filter
     filter.setValue(baseImage, forKey: kCIInputImageKey) // inserts original image an extract that image w/ filter applied
     let result = filter.valueForKey(kCIOutputImageKey) as CIImage  //output and convert the image to a CIImage
-    //let extent = result.extent()
-    //let imageRef = self.gpuContext.createCGImage(result, fromRect: extent) // remove this - for resizing
-    let filteredMainImage = UIImage(CIImage: result) // convert the CIImage to a UIImage, which can then be displayed
+    let extent = result.extent()
+    let imageRef = self.gpuContext.createCGImage(result, fromRect: extent) // remove this - for resizing
+    let filteredMainImage = UIImage(CGImage: imageRef)// convert the CIImage to a UIImage, which can then be displayed
+    
     return filteredMainImage!    // this is the entire filtering process, synchronous
   }
   
   /******************* MARK: collectionView setup  *******************/
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+
     self.mainImage.image = self.filterForMainImage(indexPath)
+    
   }
   
   func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -272,35 +275,35 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   }
   
   /******************* MARK: constraints for subviews  *******************/
-  func assignConstraintsForViews(rootView: UIView, views: [String:AnyObject]) {
+  func assignConstraintsForViews(rootView: UIView, metrics: [String:AnyObject], views: [String:AnyObject]) {
     
     //  mainButton
-    let mainButtonPositionX = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainButton(30)]-30-|", options: nil, metrics: nil, views: views)
+    let mainButtonPositionX = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainButton(mainButtonSize)]-mainButtonSize-|", options: nil, metrics: metrics, views: views)
     rootView.addConstraints(mainButtonPositionX)
     
     let mainButtonCenter = NSLayoutConstraint(item: mainButton, attribute: .CenterX, relatedBy: .Equal, toItem: rootView, attribute: .CenterX, multiplier: 1.0, constant: 0.0)
     rootView.addConstraint(mainButtonCenter)
     
     //  mainImage
-    let mainImageConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-10-[mainImage]-10-|",
+    let mainImageConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-mainImageHorizontal-[mainImage]-mainImageHorizontal-|",
       options: nil, metrics: nil, views: views)
     rootView.addConstraints(mainImageConstraintHorizontal)
 
-    let mainImageConstraintVertTop = NSLayoutConstraint.constraintsWithVisualFormat("V:|-50-[mainImage]", options: nil, metrics: nil, views: views)
+    let mainImageConstraintVertTop = NSLayoutConstraint.constraintsWithVisualFormat("V:|-mainImageTop-[mainImage]", options: nil, metrics: metrics, views: views)
     self.mainImageResizeableConstraintTop = mainImageConstraintVertTop.first as NSLayoutConstraint
   
-    let mainImageConstraintVertBottom = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainImage]-80-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: views)
+    let mainImageConstraintVertBottom = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainImage]-mainImageBottom-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: views)
     rootView.addConstraints(mainImageConstraintVertBottom)
     self.mainImageResizeableConstraintBottom = mainImageConstraintVertBottom.first as NSLayoutConstraint
   
 
     //  collectionView
-    let collectionViewConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collectionView]-|", options: nil, metrics: nil, views: views)
+    let collectionViewConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collectionView]-|", options: nil, metrics: metrics, views: views)
     rootView.addConstraints(collectionViewConstraintHorizontal)
     
-    let collectionViewHeight = NSLayoutConstraint.constraintsWithVisualFormat("V:[collectionView(100)]", options: nil, metrics: nil, views: views)
+    let collectionViewHeight = NSLayoutConstraint.constraintsWithVisualFormat("V:[collectionView(cvHeight)]", options: nil, metrics: metrics, views: views)
     self.collectionView.addConstraints(collectionViewHeight )
-    let collectionViewConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:[collectionView]-(-120)-|", options: nil, metrics: nil, views: views)
+    let collectionViewConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:[collectionView]-(cvBottom)-|", options: nil, metrics: metrics, views: views)
     rootView.addConstraints(collectionViewConstraintVerticle)
     self.collectionViewYConstraint = collectionViewConstraintVerticle.first as NSLayoutConstraint
     
