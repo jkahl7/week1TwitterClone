@@ -27,12 +27,13 @@ class photosViewController: UIViewController, UICollectionViewDataSource, UIColl
     let rootView = UIView(frame: UIScreen.mainScreen().bounds)
     
     let collectionViewFlowLayout = UICollectionViewFlowLayout()
-    collectionViewFlowLayout.itemSize = imageSize
-    //collectionViewFlowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
-    collectionViewFlowLayout.sectionInset = UIEdgeInsets(top: 5, left: 1, bottom: 5, right: 1)
+    collectionViewFlowLayout.itemSize = CGSize(width: 225, height: 175)
+    collectionViewFlowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
+    collectionViewFlowLayout.sectionInset = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
     
     self.collectionView = UICollectionView(frame: rootView.bounds, collectionViewLayout: collectionViewFlowLayout)
     self.collectionView.backgroundColor = UIColor.whiteColor()
+
     collectionView.setTranslatesAutoresizingMaskIntoConstraints(false)
     
     rootView.addSubview(collectionView)
@@ -51,6 +52,7 @@ class photosViewController: UIViewController, UICollectionViewDataSource, UIColl
     
     self.fetchAssetsResult = PHAsset.fetchAssetsWithOptions(nil) //Retrieves all assets matching the specified options
   }
+
   
   func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return self.fetchAssetsResult.count
@@ -60,7 +62,7 @@ class photosViewController: UIViewController, UICollectionViewDataSource, UIColl
     let cell = collectionView.dequeueReusableCellWithReuseIdentifier("GALLERYCELL", forIndexPath: indexPath) as GalleryCell
     
     let asset = self.fetchAssetsResult[indexPath.row] as PHAsset
-    self.imageManager.requestImageForAsset(asset, targetSize: imageSize, contentMode: PHImageContentMode.AspectFill, options: nil) { (requestedImage, info) -> Void in
+    self.imageManager.requestImageForAsset(asset, targetSize: self.imageSize, contentMode: PHImageContentMode.AspectFill, options: nil) { (requestedImage, info) -> Void in
       cell.imageView.image = requestedImage
     }
     return cell
@@ -70,6 +72,7 @@ class photosViewController: UIViewController, UICollectionViewDataSource, UIColl
     let assetSelected = self.fetchAssetsResult[indexPath.row] as PHAsset
     
     self.imageManager.requestImageForAsset(assetSelected, targetSize: self.destinationImageSize, contentMode: PHImageContentMode.AspectFill, options: nil) { (requestedImage, info) -> Void in
+      
       self.delegate?.controllerDidSelectImage(requestedImage)
       self.navigationController?.popToRootViewControllerAnimated(true)
     }
