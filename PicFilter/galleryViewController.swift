@@ -26,36 +26,27 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
   var galleryImages = [UIImage]()
   var delegate:ImageSelectionProtocol?
   let collectionViewFlowLayout = UICollectionViewFlowLayout()
+  var rootView:UIView!
   
   override func loadView() {
-    let rootView = UIView(frame: UIScreen.mainScreen().bounds)
+    self.rootView = UIView(frame: UIScreen.mainScreen().bounds)
     self.collectionViewFlowLayout.itemSize = CGSize(width: 225, height: 175)
     self.collectionViewFlowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
     self.collectionViewFlowLayout.sectionInset = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
     
-    self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: collectionViewFlowLayout)
+    self.collectionView = UICollectionView(frame: rootView.frame, collectionViewLayout: self.collectionViewFlowLayout)
     rootView.addSubview(self.collectionView)
     self.collectionView.backgroundColor = UIColor.whiteColor()
     
-    let view = ["collectionViewFlowLayout" : collectionViewFlowLayout, "collectionView" : collectionView]
-
-    rootView.addSubview(collectionView)
-    self.collectionView.setTranslatesAutoresizingMaskIntoConstraints(false)
-    
+    self.rootView.addSubview(self.collectionView)
+   
     self.collectionView.dataSource = self
     self.collectionView.delegate = self
     
     
-    
     let pinchedGestureForCV = UIPinchGestureRecognizer(target: self, action: "collectionViewPinchedGesture:")
     self.collectionView.addGestureRecognizer(pinchedGestureForCV)
-    
-    let collectionViewConstraintV = NSLayoutConstraint.constraintsWithVisualFormat("V:|-[collectionView]-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: view)
-    rootView.addConstraints(collectionViewConstraintV)
-    
-    let collectionViewConstraintY = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collectionView]-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: nil, views: view)
-    rootView.addConstraints(collectionViewConstraintY)
-    
+
     self.view = rootView
   }
 
@@ -63,16 +54,14 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
       super.viewDidLoad()
     self.view.backgroundColor = UIColor.blackColor()
     self.collectionView.registerClass(GalleryCell.self, forCellWithReuseIdentifier: "GALLERYCELL")
-      
+    
+    //populate the galleryImages
     for (var i = 0; i < imageCount; i++) {
       let image = UIImage(named: "image\(i).jpeg")
+      
       galleryImages.append(image!)
     }
   }
-  /*
-  optional func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-    
-  }*/
   
   func collectionViewPinchedGesture(sender: UIPinchGestureRecognizer) {
     switch sender.state {
@@ -83,11 +72,9 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
     case .Ended:
       self.collectionView.performBatchUpdates({ () -> Void in
         if (sender.velocity > 0) {
-          let zoomIn = CGSize(width: (self.collectionViewFlowLayout.itemSize.width) * 2 , height: (self.collectionViewFlowLayout.itemSize.height) * 2)
-          self.collectionViewFlowLayout.itemSize = zoomIn
+          self.collectionViewFlowLayout.itemSize = CGSize(width: (self.collectionViewFlowLayout.itemSize.width) * 2 , height: (self.collectionViewFlowLayout.itemSize.height) * 2)
         } else if (sender.velocity < 0) {
-          let zoomOut = CGSize(width: (self.collectionViewFlowLayout.itemSize.width) * 0.5, height: (self.collectionViewFlowLayout.itemSize.height) * 0.5)
-          self.collectionViewFlowLayout.itemSize = zoomOut
+          self.collectionViewFlowLayout.itemSize = CGSize(width: (self.collectionViewFlowLayout.itemSize.width) * 0.5, height: (self.collectionViewFlowLayout.itemSize.height) * 0.5)
         }
       }, completion: { (completed) -> Void in
         
@@ -110,17 +97,8 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
     // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
       let cell = collectionView.dequeueReusableCellWithReuseIdentifier("GALLERYCELL", forIndexPath: indexPath) as GalleryCell
-      
-      let image = self.galleryImages[indexPath.row]
-      
-      cell.imageView.image = image
 
-      //cell.imageView.sizeThatFits(self.collectionViewFlowLayout.itemSize)
-      
-      //self.collectionView.reloadItemsAtIndexPaths([indexPath.row])
-      
-      //cell.sizeThatFits(self.collectionViewFlowLayout.itemSize)
-      
+      cell.imageView.image = self.galleryImages[indexPath.row]
       
       return cell
     }
@@ -131,4 +109,5 @@ class galleryViewController: UIViewController, UICollectionViewDataSource, UICol
     
       self.navigationController?.popViewControllerAnimated(true)
     }
+
 }

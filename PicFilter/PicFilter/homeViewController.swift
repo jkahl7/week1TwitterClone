@@ -9,9 +9,9 @@
 import UIKit
 import Social
 
-class homeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageSelectionProtocol, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class homeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageSelectionProtocol, UIPopoverPresentationControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
   
-  let alertController = UIAlertController(title: "I Should Put", message: "Something Here", preferredStyle: UIAlertControllerStyle.ActionSheet)
+  let alertController = UIAlertController(title: NSLocalizedString("Select an option", comment: "Title for string"), message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
   
   let rootView = UIView(frame: UIScreen.mainScreen().bounds)
   let mainButton = UIButton()
@@ -35,9 +35,8 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   var collectionView:UICollectionView!
  
   var collectionViewYConstraint:NSLayoutConstraint!
-  var mainImageResizeableConstraintTop:NSLayoutConstraint!
-  var mainImageResizeableConstraintBottom:NSLayoutConstraint!
-  var mainImageResizeableConstraintHorizontal:[AnyObject]!
+  var mainImageResizeableConstraintFooter:NSLayoutConstraint!
+  //var mainImageResizeableConstraintHorizontal:NSLayoutConstraint!  // for altering horizontal constraints
 
   
   override func loadView() {
@@ -45,14 +44,14 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     self.rootView.backgroundColor = UIColor.whiteColor()
     
     self.mainButton.backgroundColor = UIColor.blackColor()
-    self.mainButton.setTitle("Images", forState: .Normal)
+    self.mainButton.setTitle(NSLocalizedString("Images", comment: "images button"), forState: .Normal)
     self.mainButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
     self.mainButton.addTarget(self, action: "mainButtonActivated:", forControlEvents: UIControlEvents.TouchUpInside)
     
     self.mainImage.image = defaultImage
-    self.mainImage.backgroundColor = UIColor.blackColor()
-    self.mainImage.contentMode = UIViewContentMode.ScaleAspectFill
-    self.mainImage.layer.masksToBounds = false
+    self.mainImage.backgroundColor = UIColor.clearColor()
+    self.mainImage.contentMode = UIViewContentMode.ScaleAspectFit
+    self.mainImage.layer.masksToBounds = true
     
     self.collectionViewFlowLayout.itemSize = CGSize(width: 100, height: 85)
     self.collectionViewFlowLayout.scrollDirection = .Horizontal
@@ -72,23 +71,21 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     self.mainButton.setTranslatesAutoresizingMaskIntoConstraints(false)
     self.mainImage.setTranslatesAutoresizingMaskIntoConstraints(false)
     self.collectionView.setTranslatesAutoresizingMaskIntoConstraints(false)
-  
     
     let views = ["mainButton" : mainButton, "mainImage" : mainImage, "collectionView" : collectionView]
     
-    self.metricsForVFL = ["mainImageVerticle":100, "mainImageHorizontal":10,
+    //dictionary that is used to set constraint spacing
+    self.metricsForVFL = ["mainImageHeader": 60, "mainImageFooter": 70, "mainImageHorizontal": 5,
       "cvHeight":100 ,"cvBottom": -120,"mainButtonSize": 25]
-    /*
-    self.shiftMetrics = ["mainImageVerticle":80, "mainImageHorizontal":15,
-      "cvHeight":100 ,"cvBottom": 20,"mainButtonSize": 25]
-    */
+
+    
     // disables color context for increased performance at the cost of reduced image quality
     let options = [kCIContextWorkingColorSpace:NSNull()]
     let eaglContext = EAGLContext(API: EAGLRenderingAPI.OpenGLES2) //boilerplate code from apple
     self.gpuContext = CIContext(EAGLContext: eaglContext, options: options)
     self.thumbNailSetup()
     
-    self.assignConstraintsForViews(rootView, metrics: metricsForVFL, views: views)
+    self.assignConstraintsForViews(rootView, metrics: self.metricsForVFL, views: views)
     
     self.view = rootView
   }
@@ -99,7 +96,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     // UIIMagePickerController
     if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-      let cameraOption = UIAlertAction(title: "Camera", style: UIAlertActionStyle.Default, handler: { (action) -> Void in
+      let cameraOption = UIAlertAction(title: NSLocalizedString("Camera", comment: "camera alert"), style: UIAlertActionStyle.Default, handler: { (action) -> Void in
         let imagePickerController = UIImagePickerController()
         imagePickerController.sourceType = UIImagePickerControllerSourceType.Camera
         imagePickerController.allowsEditing = true
@@ -110,14 +107,14 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     }
     
     //  UIAlertActoions
-    let galleryAlert = UIAlertAction(title: "Gallery", style: UIAlertActionStyle.Default) { (action) -> Void in
+    let galleryAlert = UIAlertAction(title: NSLocalizedString("Gallery", comment: "gallery alert"), style: UIAlertActionStyle.Default) { (action) -> Void in
       let galleryVC = galleryViewController()
       galleryVC.delegate = self
       self.navigationController?.pushViewController(galleryVC, animated: true)
     }
     self.alertController.addAction(galleryAlert)
     
-    let photoAlert = UIAlertAction(title: "Photos", style: UIAlertActionStyle.Default) { (action) -> Void in
+    let photoAlert = UIAlertAction(title: NSLocalizedString("Photos", comment: "photos alert"), style: UIAlertActionStyle.Default) { (action) -> Void in
       let photoVC = photosViewController()
       photoVC.delegate = self
       photoVC.destinationImageSize = self.mainImage.frame.size
@@ -125,18 +122,14 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     }
     self.alertController.addAction(photoAlert)
 
-    let filterAlert = UIAlertAction(title: "Filter", style: UIAlertActionStyle.Default) { (action) -> Void in
+    let filterAlert = UIAlertAction(title: NSLocalizedString("Filter", comment: "filter alert"), style: UIAlertActionStyle.Default) { (action) -> Void in
       // allow done button to apply selected filter and hide collectionView
       self.navigationItem.rightBarButtonItem = self.doneButton
-      self.collectionViewYConstraint.constant = self.metricsForVFL["cvBottom"] as CGFloat + 140
+      self.mainImageResizeableConstraintFooter.constant = self.metricsForVFL["mainImageFooter"] as CGFloat + 50
       UIView.animateWithDuration(0.4, animations: { () -> Void in
         self.view.layoutIfNeeded()   // invalidates the mode of the current receiver and triggers a layout update w/ next cycle
       })
-      self.mainImageResizeableConstraintTop.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat + 20
-      UIView.animateWithDuration(0.4, animations: { () -> Void in
-        self.view.layoutIfNeeded()
-      })
-      self.mainImageResizeableConstraintBottom.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat + 20
+      self.collectionViewYConstraint.constant = self.metricsForVFL["cvBottom"] as CGFloat + 140
       UIView.animateWithDuration(0.4, animations: { () -> Void in
         self.view.layoutIfNeeded()
       })
@@ -151,10 +144,23 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   
   }
 
-   /******************* MARK: button actions  *******************/
+   /******************* MARK: alert controller setup  *******************/
+  
+  
+  func prepareForPopoverPresentation(popoverPresentationController: UIPopoverPresentationController) {
+    popoverPresentationController.sourceView = self.mainButton
+    popoverPresentationController.sourceRect = self.mainButton.bounds
+  }
+  
+  /******************* MARK: button actions  *******************/
   func mainButtonActivated(sender: UIButton) {
+    if let iPadPopController = self.alertController.popoverPresentationController {
+      prepareForPopoverPresentation(iPadPopController)
+      self.alertController.popoverPresentationController?.delegate = self
+    }
     self.presentViewController(self.alertController, animated: true, completion: nil)
   }
+  
   //TODO: add a cancel filter button???
   func cancelFilterSelect() {
     self.collectionViewYConstraint.constant = self.metricsForVFL["cvBottom"] as CGFloat
@@ -172,29 +178,29 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
       self.view.layoutIfNeeded()
     })
     self.navigationItem.rightBarButtonItem = self.shareButton
-      self.mainImageResizeableConstraintTop.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat
-    UIView.animateWithDuration(0.4, animations: { () -> Void in
-      self.view.layoutIfNeeded()
-    })
-    self.mainImageResizeableConstraintBottom.constant = self.metricsForVFL["mainImageVerticle"] as CGFloat
+    
+    self.mainImageResizeableConstraintFooter.constant = self.metricsForVFL["mainImageFooter"] as CGFloat
     UIView.animateWithDuration(0.4, animations: { () -> Void in
       self.view.layoutIfNeeded()
     })
   }
+  
   //   shareButtonSelected
   func shareButtonSelected() {
-    let notSignedInAlert = UIAlertController(title: "Error", message: "You are not signed into Twitter!", preferredStyle: UIAlertControllerStyle.Alert)
+    let error = NSLocalizedString("Error", comment: "Error message")
+    let notSignedIn = NSLocalizedString("You are not signed into Twitter!", comment: "twitter warning")
+    let okay = NSLocalizedString("Okay", comment: "okay message")
+    let notSignedInAlert = UIAlertController(title: error, message: notSignedIn, preferredStyle: UIAlertControllerStyle.Alert)
+    
     if(SLComposeViewController.isAvailableForServiceType(SLServiceTypeTwitter)) {
       let composeVC = SLComposeViewController(forServiceType: SLServiceTypeTwitter)
       composeVC.addImage(self.mainImage.image)
       self.presentViewController(composeVC, animated: true, completion: nil)
     } else {
-      let notSignedInAlert = UIAlertController(title: "Error", message: "You are not signed into Twitter!", preferredStyle: UIAlertControllerStyle.Alert)
-      let twitterAlert = UIAlertAction(title: "Okay", style: UIAlertActionStyle.Destructive, handler: nil)
+      let twitterAlert = UIAlertAction(title: okay, style: UIAlertActionStyle.Destructive, handler: nil)
       notSignedInAlert.addAction(twitterAlert)
     }
   }
-  
   
    /******************* MARK: imagePickerControll  *******************/
   func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject:AnyObject]) {
@@ -237,6 +243,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     }
     self.collectionView.reloadData()
   }
+
   
   //MARK: filterForMainImage()  function for generating a filtered main image
   func filterForMainImage(indexPath:NSIndexPath!) -> UIImage {
@@ -255,7 +262,7 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
   
   /******************* MARK: collectionView setup  *******************/
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-
+    
     self.mainImage.image = self.filterForMainImage(indexPath)
     
   }
@@ -289,23 +296,20 @@ class homeViewController: UIViewController, UICollectionViewDataSource, UICollec
     let mainButtonCenter = NSLayoutConstraint(item: mainButton, attribute: .CenterX, relatedBy: .Equal, toItem: rootView, attribute: .CenterX, multiplier: 1.0, constant: 0.0)
     rootView.addConstraint(mainButtonCenter)
     
-    //  mainImage
+    // mainImage
     let mainImageConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-mainImageHorizontal-[mainImage]-mainImageHorizontal-|",
       options: nil, metrics: metrics, views: views)
     rootView.addConstraints(mainImageConstraintHorizontal)
-    self.mainImageResizeableConstraintHorizontal = mainImageConstraintHorizontal as [AnyObject]
-    for item in self.mainImageResizeableConstraintHorizontal {
-      println("\(item)")
-    }
+    //self.mainImageResizeableConstraintHorizontal = mainImageConstraintHorizontal.first as NSLayoutConstraint
 
-    let mainImageConstraintVertTop = NSLayoutConstraint.constraintsWithVisualFormat("V:|-mainImageVerticle-[mainImage]", options: nil, metrics: metrics, views: views)
-    self.mainImageResizeableConstraintTop = mainImageConstraintVertTop.first as NSLayoutConstraint
-  
-    let mainImageConstraintVertBottom = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainImage]-mainImageVerticle-|", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: metrics, views: views)
-    rootView.addConstraints(mainImageConstraintVertBottom)
-    self.mainImageResizeableConstraintBottom = mainImageConstraintVertBottom.first as NSLayoutConstraint
-  
-
+    let mainImageConstraintVerticle = NSLayoutConstraint.constraintsWithVisualFormat("V:|-mainImageHeader-[mainImage]", options: NSLayoutFormatOptions.AlignAllCenterY, metrics: metrics, views: views)
+    rootView.addConstraints(mainImageConstraintVerticle)
+    self.mainImageResizeableConstraintFooter = mainImageConstraintVerticle.first as NSLayoutConstraint
+    
+    let mainIMageConstraintFooter = NSLayoutConstraint.constraintsWithVisualFormat("V:[mainImage]-mainImageFooter-|", options: nil, metrics: metrics, views: views)
+    rootView.addConstraints(mainIMageConstraintFooter)
+    self.mainImageResizeableConstraintFooter = mainIMageConstraintFooter.first as NSLayoutConstraint
+    
     //  collectionView
     let collectionViewConstraintHorizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collectionView]-|", options: nil, metrics: metrics, views: views)
     rootView.addConstraints(collectionViewConstraintHorizontal)

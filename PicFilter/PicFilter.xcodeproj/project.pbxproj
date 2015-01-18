@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		430305A21A64A44D0091165C /* galleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430305A11A64A44D0091165C /* galleryViewController.swift */; };
+		430B0A511A6B6BD9000E14BE /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 430B0A531A6B6BD9000E14BE /* Localizable.strings */; };
 		431637B11A6718A0003B498F /* photosViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 431637B01A6718A0003B498F /* photosViewController.swift */; };
 		436B79721A6892610069F9BF /* image0.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 436B79641A6892610069F9BF /* image0.jpeg */; };
 		436B79731A6892610069F9BF /* image1.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 436B79651A6892610069F9BF /* image1.jpeg */; };
@@ -47,6 +48,10 @@
 
 /* Begin PBXFileReference section */
 		430305A11A64A44D0091165C /* galleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = galleryViewController.swift; path = ../galleryViewController.swift; sourceTree = "<group>"; };
+		430B0A4D1A6B682E000E14BE /* th-TH */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "th-TH"; path = "th-TH.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		430B0A4E1A6B682E000E14BE /* th-TH */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "th-TH"; path = "th-TH.lproj/Main.strings"; sourceTree = "<group>"; };
+		430B0A541A6B6BE3000E14BE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		430B0A551A6B6BF2000E14BE /* th-TH */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "th-TH"; path = "th-TH.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		431637B01A6718A0003B498F /* photosViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = photosViewController.swift; sourceTree = "<group>"; };
 		436B79641A6892610069F9BF /* image0.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = image0.jpeg; path = ../../../imagesweek2/image0.jpeg; sourceTree = "<group>"; };
 		436B79651A6892610069F9BF /* image1.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = image1.jpeg; path = ../../../imagesweek2/image1.jpeg; sourceTree = "<group>"; };
@@ -189,6 +194,7 @@
 				430305B91A64D3260091165C /* initialImages */,
 				4383208D1A6468EE0013CBC3 /* LaunchScreen.xib */,
 				43F0A1081A649F0D00AFDF1D /* GalleryCell.swift */,
+				430B0A531A6B6BD9000E14BE /* Localizable.strings */,
 				438320881A6468EE0013CBC3 /* Main.storyboard */,
 			);
 			name = View;
@@ -268,6 +274,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"th-TH",
 			);
 			mainGroup = 438320761A6468EE0013CBC3;
 			productRefGroup = 438320801A6468EE0013CBC3 /* Products */;
@@ -290,6 +297,7 @@
 				436B79721A6892610069F9BF /* image0.jpeg in Resources */,
 				436B79741A6892610069F9BF /* image2.jpeg in Resources */,
 				436B79761A6892610069F9BF /* image4.jpeg in Resources */,
+				430B0A511A6B6BD9000E14BE /* Localizable.strings in Resources */,
 				4383208A1A6468EE0013CBC3 /* Main.storyboard in Resources */,
 				436B797A1A6892610069F9BF /* image8.jpeg in Resources */,
 				436B79791A6892610069F9BF /* image7.jpeg in Resources */,
@@ -349,10 +357,20 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		430B0A531A6B6BD9000E14BE /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				430B0A541A6B6BE3000E14BE /* en */,
+				430B0A551A6B6BF2000E14BE /* th-TH */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		438320881A6468EE0013CBC3 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				438320891A6468EE0013CBC3 /* Base */,
+				430B0A4E1A6B682E000E14BE /* th-TH */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -361,6 +379,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				4383208E1A6468EE0013CBC3 /* Base */,
+				430B0A4D1A6B682E000E14BE /* th-TH */,
 			);
 			name = LaunchScreen.xib;
 			sourceTree = "<group>";
