@@ -18,14 +18,14 @@ class NetController {
   
   // store twitter account for future JSON use
   var twitterAccount:ACAccount?
-  let homeTimeLineLink = "https://api.twitter.com/1.1/statuses/home_timeline.json"
+ // let homeTimeLineLink = "https://api.twitter.com/1.1/statuses/home_timeline.json"
   let detailsLink = "https://api.twitter.com/1.1/statuses/show.json?id=" // !!! TODO: need to append userID!!!!!!!
   let profileTimeLineLink = "https://api.twitter.com/1.1/statuses/user_timeline.json?user_id=" // !!! TODO: need to append userID!!!!!!!
   
   //need account auth
   
   
-  func fetchMainTwitterContent() {  //what input? likely need a completionHandler because it its going to be an asynchronous call / what will CH return?
+  func fetchTwitterContent(jsonURL:String, userID:String?, completionHandler:(tweets:[Tweet]?, error:String) -> Void) {  //what input? likely need a completionHandler because it its going to be an asynchronous call / what will CH return?
     
     //need account auth
     let savedAccount = ACAccountStore()
@@ -37,7 +37,7 @@ class NetController {
         if (!accounts.isEmpty) {
           self.twitterAccount = accounts[0] as? ACAccount
           // get JSON data
-          let url = NSURL(string: self.homeTimeLineLink)
+          let url = NSURL(string: jsonURL)
           let twitterFetch = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: SLRequestMethod.GET, URL: url, parameters: nil)
           twitterFetch.account = self.twitterAccount
           twitterFetch.performRequestWithHandler({ (data, response, error) -> Void in
@@ -54,18 +54,19 @@ class NetController {
                     if let objectDictionary = object as? NSDictionary {
                       let tweet = Tweet(jsonDictionary: objectDictionary)
                       tweets.append(tweet)
-                    } else {
-                      println("nothing found in jsonDictionary")
                     }
+                    completionHandler(tweets: tweets, error: "no error here")
                   }
                 }
-                
               case 300...499:
                 println("\(response.statusCode) = error on client side")
+                completionHandler(tweets: nil, error: "this is not good")
               case 500...599:
                 println("\(response.statusCode) = error on server side")
+                completionHandler(tweets: nil, error: "this is not good")
               default:
                 println("\(response.statusCode) = default case executed - check code")
+                completionHandler(tweets: nil, error: "this is not good")
               }
             } else {
               // alert controller?

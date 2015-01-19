@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="333" id="UH5-vT-7Z2" customClass="TweetCell" customModule="TwitterClonePartDeux" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="530" height="333"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="UH5-vT-7Z2" id="yyL-lI-BSH">
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ScreenName" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="o9Q-Sq-faI">
+                        <rect key="frame" x="20" y="20" width="200" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="200" id="GlP-9b-hIA"/>
+                            <constraint firstAttribute="height" constant="21" id="kiX-xr-QbW"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TweetContent" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fg4-M9-44p">
+                        <rect key="frame" x="20" y="60" width="350" height="60"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="60" id="YiY-yB-Mnf"/>
+                            <constraint firstAttribute="width" constant="350" id="y1o-qG-kr8"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="o9Q-Sq-faI" firstAttribute="leading" secondItem="yyL-lI-BSH" secondAttribute="leading" constant="20" id="MRz-e2-PR0"/>
+                    <constraint firstItem="fg4-M9-44p" firstAttribute="top" secondItem="o9Q-Sq-faI" secondAttribute="bottom" constant="19" id="OJJ-uQ-s8P"/>
+                    <constraint firstItem="fg4-M9-44p" firstAttribute="leading" secondItem="yyL-lI-BSH" secondAttribute="leading" constant="20" id="P6Q-u1-SKf"/>
+                    <constraint firstItem="o9Q-Sq-faI" firstAttribute="top" secondItem="yyL-lI-BSH" secondAttribute="top" constant="20" id="uob-DS-Hqh"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="screenName" destination="o9Q-Sq-faI" id="nJG-Fb-rjt"/>
+                <outlet property="tweetContent" destination="fg4-M9-44p" id="mdz-hg-Xta"/>
+            </connections>
+            <point key="canvasLocation" x="826" y="439.5"/>
+        </tableViewCell>
+    </objects>
+</document>
