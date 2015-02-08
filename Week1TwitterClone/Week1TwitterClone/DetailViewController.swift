@@ -8,39 +8,42 @@
 
 import UIKit
 
-class DetailViewController: UIViewController {
- 
-  var tweet: Tweet! // recieves an unwrapped tweet class from the TableViewController -> need its userID
-  
+class DetailViewController: UIViewController
+{
+  var tweet             : Tweet! // recieves an unwrapped tweet class from the TableViewController
   var networkController : NetworkController! //this will refrence the same instance of the
  
-  @IBOutlet weak var backgroundImage: UIImageView!
-  @IBOutlet weak var buttonImage: UIButton!
-  @IBOutlet weak var favoritesLabel: UILabel!
+  @IBOutlet weak var backgroundImage  : UIImageView!
+  @IBOutlet weak var buttonImage      : UIButton!
+  @IBOutlet weak var favoritesLabel   : UILabel!
   
   // clicking the button triggers the TimeLineVC to appear
-  @IBAction func buttonClicked(sender: UIButton) {
+  @IBAction func buttonClicked(sender: UIButton)
+  {
     let toTimeLineVC = self.storyboard?.instantiateViewControllerWithIdentifier("HOMETIMELINE") as TimeLineViewController
     navigationController?.pushViewController(toTimeLineVC, animated: true)
+   
     toTimeLineVC.networkController = self.networkController
-    toTimeLineVC.userID = self.tweet.userID
-    toTimeLineVC.selectedTweet = self.tweet
+    toTimeLineVC.userID            = self.tweet.userID
+    toTimeLineVC.selectedTweet     = self.tweet
   }
   
-  override func viewDidLoad() {
+  override func viewDidLoad()
+  {
     super.viewDidLoad()
     self.buttonImage.setImage(self.tweet.image, forState: .Normal)
     self.networkController.fetchDetailForCell(self.tweet.ID, completionHandler: { (details, errorReport) -> Void in
-        if (errorReport == nil) {
+        if (errorReport == nil)
+        {
           self.tweet.updateWithInfo(details!)
-          self.favoritesLabel.text = "Favorited:" + self.tweet.favoriteCount!
+          self.favoritesLabel.text   = "Favorited:" + self.tweet.favoriteCount!
           self.backgroundImage.image = self.tweet.backgroundImage
         }
       })
     }
 
-    override func didReceiveMemoryWarning() {
+    override func didReceiveMemoryWarning()
+    {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
   }
